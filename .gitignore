@@ -162,3 +162,4 @@ cython_debug/
 /build.py
 /Server/chat.db
 /Client/config.json
+/Server/temp
