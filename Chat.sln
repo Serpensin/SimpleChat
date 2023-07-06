@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33815.320
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Client", "Client\Client.pyproj", "{76A4BE51-5DC9-4110-B3D5-4619D7190E02}"
+EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Server", "Server\Server.pyproj", "{5D4CC877-5133-4603-8A61-E15502F2ECDA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Projektmappenelemente", "Projektmappenelemente", "{9681448B-5461-468F-B19F-A7247A4FB9E0}"
+	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		.gitlab-ci.yml = .gitlab-ci.yml
+		build.py = build.py
+		LICENSE.txt = LICENSE.txt
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{76A4BE51-5DC9-4110-B3D5-4619D7190E02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76A4BE51-5DC9-4110-B3D5-4619D7190E02}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D4CC877-5133-4603-8A61-E15502F2ECDA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D4CC877-5133-4603-8A61-E15502F2ECDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B16F1105-6093-405B-8CB4-143C6BBC79B5}
+	EndGlobalSection
+EndGlobal
