@@ -178,40 +178,42 @@ class routes():
 
     @app.route('/create_room', methods=['POST'])
     def create_room():
-        c = conn.cursor()
-        room_id = request.json.get('room_id', '').strip().replace(' ', '')
-        if not 6 <= len(room_id) <= 36 or room_id == '':
-            while room_id == '' or c.execute(f"SELECT 1 FROM rooms WHERE room_id = ?", (room_id,)).fetchone() is not None:
-                room_id = str(uuid.uuid4())
-            key = base64.b64encode(os.urandom(32)).decode('utf-8')
-            c.execute("INSERT INTO rooms (room_id, key) VALUES (?, ?)", (room_id, key,))
-            conn.commit()
-            return jsonify({'room_id': room_id, 'key': key}), 201
-        else:
-            if not 6 <= len(room_id) <= 36:
-                return jsonify({'error': 'Room ID must be between 6 and 36 characters long'}), 400
-            if c.execute("SELECT 1 FROM rooms WHERE room_id = ?", (room_id,)).fetchone() is not None:
-                return jsonify({'error': 'Room already exists'}), 409
-            else:
+        with conn:
+            c = conn.cursor()
+            room_id = request.json.get('room_id', '').strip().replace(' ', '')
+            if not 6 <= len(room_id) <= 36 or room_id == '':
+                while room_id == '' or c.execute(f"SELECT 1 FROM rooms WHERE room_id = ?", (room_id,)).fetchone() is not None:
+                    room_id = str(uuid.uuid4())
                 key = base64.b64encode(os.urandom(32)).decode('utf-8')
                 c.execute("INSERT INTO rooms (room_id, key) VALUES (?, ?)", (room_id, key,))
                 conn.commit()
                 return jsonify({'room_id': room_id, 'key': key}), 201
+            else:
+                if not 6 <= len(room_id) <= 36:
+                    return jsonify({'error': 'Room ID must be between 6 and 36 characters long'}), 400
+                if c.execute("SELECT 1 FROM rooms WHERE room_id = ?", (room_id,)).fetchone() is not None:
+                    return jsonify({'error': 'Room already exists'}), 409
+                else:
+                    key = base64.b64encode(os.urandom(32)).decode('utf-8')
+                    c.execute("INSERT INTO rooms (room_id, key) VALUES (?, ?)", (room_id, key,))
+                    conn.commit()
+                    return jsonify({'room_id': room_id, 'key': key}), 201
 
 
     @app.route('/room_exists', methods=['GET'])
     def room_exists():
-        c = conn.cursor()
-        room_id = request.args.get('room_id', '').strip().replace(' ', '')
-        if room_id == '':
-            return jsonify({'error': 'No room_id provided'}), 400
-        else:
-            room_exists = c.execute("SELECT 1 FROM rooms WHERE room_id = ?", (room_id,)).fetchone() is not None
-            if room_exists:
-                key = c.execute("SELECT key FROM rooms WHERE room_id = ?", (room_id,)).fetchone()[0]
-                return jsonify({'status': 'Room exists', 'key': key}), 200
+        with conn:
+            c = conn.cursor()
+            room_id = request.args.get('room_id', '').strip().replace(' ', '')
+            if room_id == '':
+                return jsonify({'error': 'No room_id provided'}), 400
             else:
-                return jsonify({'error': 'Room not found'}), 404
+                room_exists = c.execute("SELECT 1 FROM rooms WHERE room_id = ?", (room_id,)).fetchone() is not None
+                if room_exists:
+                    key = c.execute("SELECT key FROM rooms WHERE room_id = ?", (room_id,)).fetchone()[0]
+                    return jsonify({'status': 'Room exists', 'key': key}), 200
+                else:
+                    return jsonify({'error': 'Room not found'}), 404
 
 
     @app.route('/health', methods=['GET'])
@@ -236,24 +238,24 @@ class routes():
 class sockets():
     @socketio.on('join')
     def on_join(data):
-        print(data)
-        c = conn.cursor()
-        username = data['username'].strip().replace(' ', '')
-        room_id = data['room'].strip().replace(' ', '')
+        with conn:
+            c = conn.cursor()
+            username = data['username'].strip().replace(' ', '')
+            room_id = data['room'].strip().replace(' ', '')
 
-        if not 3 <= len(username) <= 20:
-            return jsonify({'error': 'Username must be between 3 and 20 characters long'}), 400
-        if not 6 <= len(room_id) <= 36:
-            return jsonify({'error': 'Room ID must be between 6 and 36 characters long'}), 400
+            if not 3 <= len(username) <= 20:
+                return jsonify({'error': 'Username must be between 3 and 20 characters long'}), 400
+            if not 6 <= len(room_id) <= 36:
+                return jsonify({'error': 'Room ID must be between 6 and 36 characters long'}), 400
 
-        # Load key from db rooms table
-        c.execute("INSERT INTO clients (client_id, username, room) VALUES (?, ?, ?)",
-                  (request.sid, username, room_id))
-        c.execute("INSERT INTO connection_status (client_id, status) VALUES (?, ?)",
-                  (request.sid, 'connected'))
-        conn.commit()
-        join_room(room_id)
-        socketio.emit('join', {'message': f"{username} has joined the room."}, room=room_id, include_self=False)
+            # Load key from db rooms table
+            c.execute("INSERT INTO clients (client_id, username, room) VALUES (?, ?, ?)",
+                      (request.sid, username, room_id))
+            c.execute("INSERT INTO connection_status (client_id, status) VALUES (?, ?)",
+                      (request.sid, 'connected'))
+            conn.commit()
+            join_room(room_id)
+            socketio.emit('join', {'message': f"{username} has joined the room."}, room=room_id, include_self=False)
 
     @socketio.on('message')
     def handle_message(data):
@@ -264,33 +266,34 @@ class sockets():
 
     @socketio.on('leave')
     def on_leave(data):
-        print(data)
-        c = conn.cursor()
-        username = data['username']
-        room_id = data['room']
-        leave_room(room_id)
-        c.execute("UPDATE connection_status SET status = ? WHERE client_id = ?", ('disconnected', request.sid))
-        try:
-            conn.commit()
-        except sqlite3.Error:
-            pass
-        socketio.emit('leave', {'message': f"{username} has left the room."}, room=room_id, include_self=False)
+        with conn:
+            c = conn.cursor()
+            username = data['username']
+            room_id = data['room']
+            leave_room(room_id)
+            c.execute("UPDATE connection_status SET status = ? WHERE client_id = ?", ('disconnected', request.sid))
+            try:
+                conn.commit()
+            except sqlite3.Error:
+                pass
+            socketio.emit('leave', {'message': f"{username} has left the room."}, room=room_id, include_self=False)
 
     @socketio.on('disconnect')
     def handle_disconnect():
-        c = conn.cursor()
-        c.execute("SELECT username, room FROM clients WHERE client_id = ?", (request.sid,))
-        user_info = c.fetchone()
-        if user_info:
-            username, room_id = user_info
-            leave_room(room_id)
-            c.execute("SELECT status FROM connection_status WHERE client_id = ?", (request.sid,))
-            status_info = c.fetchone()
-            if status_info and status_info[0] != 'disconnected':
-                socketio.emit('disconnect', {'message': f"{username} has lost connection."}, room=room_id, include_self=False)
-        c.execute("DELETE FROM clients WHERE client_id = ?", (request.sid,))
-        c.execute("DELETE FROM connection_status WHERE client_id = ?", (request.sid,))
-        conn.commit()
+        with conn:
+            c = conn.cursor()
+            c.execute("SELECT username, room FROM clients WHERE client_id = ?", (request.sid,))
+            user_info = c.fetchone()
+            if user_info:
+                username, room_id = user_info
+                leave_room(room_id)
+                c.execute("SELECT status FROM connection_status WHERE client_id = ?", (request.sid,))
+                status_info = c.fetchone()
+                if status_info and status_info[0] != 'disconnected':
+                    socketio.emit('disconnect', {'message': f"{username} has lost connection."}, room=room_id, include_self=False)
+            c.execute("DELETE FROM clients WHERE client_id = ?", (request.sid,))
+            c.execute("DELETE FROM connection_status WHERE client_id = ?", (request.sid,))
+            conn.commit()
 
     @socketio.on('file')
     def handle_file(data):

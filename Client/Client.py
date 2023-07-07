@@ -617,19 +617,18 @@ if __name__ == '__main__':
     root = tk.Tk()
     root.withdraw()
     dir_of_app = os.path.dirname(os.path.abspath(sys.argv[0]))
-    print(dir_of_app)
 
     config_file = os.path.join(dir_of_app, 'config.json')
     if not os.path.isfile(config_file):
         # Write new config file
         config = {
-            'url': 'http://localhost',
+            'url': 'https://chat.bloodygang.com',
             'port': 5000
             }
         with open(config_file, 'w') as f:
             json.dump(config, f, indent=4)
-        url = 'http://localhost'
-        port = 5000
+        url = config['url']
+        port = config['port']
     else:
         with open(config_file, 'r') as f:
             try:
@@ -644,18 +643,25 @@ if __name__ == '__main__':
     icon = os.path.join(static, 'icon.ico')
     loading_img = os.path.join(static, 'loading.png')
     login_img = os.path.join(static, 'login.png')
-    print(icon)
     
-    base_url = f'{url}:{port}'   
     client = socketio.Client()
     try:
+        base_url = url
+        print(base_url)
         request = requests.get(f'{base_url}/health')
-        print(request)
+        if request.status_code != 200:
+            raise requests.exceptions.ConnectionError
     except requests.exceptions.ConnectionError:
-        # Hide tkinter root window
-        root.withdraw()
-        messagebox.showerror("Error", "Server is not reachable.\nPlease check the config.json file.")
-        sys.exit(1)
+        try:
+            base_url = f'{url}:{port}'  
+            print(base_url)
+            request = requests.get(f'{base_url}/health')
+            if request.status_code != 200:
+                raise requests.exceptions.ConnectionError
+        except requests.exceptions.ConnectionError:
+            root.withdraw()
+            messagebox.showerror("Error", "Server is not reachable.\nPlease check the config.json file.")
+            sys.exit(1)
     login = Login(root)
     root.mainloop()
 else:
