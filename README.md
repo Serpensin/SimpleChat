@@ -12,7 +12,7 @@ The main functions of the server include:
 
 ## Installation
 
-The server image is available on ![Docker Hub](https://img.shields.io/docker/image-size/serpensin/chatserver?label=Docker%20Hub) and can be run using Docker. Execute the following command to download and start the image:
+The server image is available on ![Docker Pulls](https://img.shields.io/docker/pulls/serpensin/chatserver?logo=docker&label=Docker%20Hub&link=https%3A%2F%2Fhub.docker.com%2Frepository%2Fdocker%2Fserpensin%2Fchatserver%2Fgeneral). Execute the following command to download and start the image:
 
 ```bash
 docker pull serpensin/chatserver
