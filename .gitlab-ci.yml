@@ -15,7 +15,7 @@ docker-build:
     - docker buildx rm chatbuilder
     - sleep 10
     - docker volume prune -f
-  timeout: 90m
+  timeout: 120m
 
 workflow:
   rules:
