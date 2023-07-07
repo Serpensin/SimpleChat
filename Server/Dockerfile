@@ -12,19 +12,12 @@ ARG TARGETPLATFORM
 ARG BUILD_DATE
 ARG COMMIT
 
-RUN python -m pip install --upgrade pip && \
+RUN apk add --no-cache --virtual .build-deps build-base linux-headers libffi-dev openssl-dev && \
+    python -m pip install --upgrade pip && \
     pip install --upgrade setuptools && \
-    apk add --no-cache build-base && \
-    apk add --no-cache linux-headers && \
-    if [ "$TARGETPLATFORM" = "linux/arm/v6" ] || [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
-        apk add --no-cache --virtual .build-deps gcc musl-dev python3-dev; \
-    fi && \
     pip install gunicorn && \
     pip install -r requirements.txt && \
-    apk del build-base && \
-    if [ "$TARGETPLATFORM" = "linux/arm/v6" ] || [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
-        apk del .build-deps; \
-    fi
+    apk del .build-deps
 
 EXPOSE 5000
 
