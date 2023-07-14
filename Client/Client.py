@@ -135,7 +135,12 @@ class Login():
             self.switch_status('normal')
             return
         if response.status_code == 200:
-            self.sio.connect(base_url)
+            try:
+                self.sio.connect(base_url)
+            except requests.exceptions.ConnectionError:
+                messagebox.showerror('Error', 'Failed to connect to server.')
+                self.switch_status('normal')
+                return
             response = self.sio.emit('join', {'username': username, 'room': room})
             print(response)
             top = tk.Toplevel(self.root)
@@ -554,6 +559,7 @@ class Chat():
         iv = data['iv']
         user = data['user']
         message = __decrypt_message(message, key, iv)
+        print(message)
         self.insert_into_chat(message, user, kind = 'message')
 
 

@@ -52,7 +52,7 @@ sentry_sdk.init(
     environment='Server'
 )
 
-if not os.path.exists('temp'):
+if not os.path.isdir('temp'):
     os.mkdir('temp')
 os.chmod('temp', stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
 
