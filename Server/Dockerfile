@@ -1,9 +1,10 @@
-FROM python:3.9.17-alpine
+FROM python:3.9.18-alpine
 
 WORKDIR /app
 
 COPY *.py .
 COPY requirements.txt .
+COPY index.html .
 
 ENV TERM xterm
 ENV PYTHONUNBUFFERED 1

@@ -28,6 +28,7 @@
   <ItemGroup>
     <Content Include=".env" />
     <Content Include=".env.template" />
+    <Content Include="static\index.html" />
     <Content Include="requirements.txt" />
     <Content Include="static\icon.ico" />
   </ItemGroup>

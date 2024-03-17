@@ -49,12 +49,12 @@ class Login():
 
         # Eingabefelder
         self.room_label = tk.Label(root, text="Room:")
-        self.room_label.pack(pady=10)  
+        self.room_label.pack(pady=10)
         self.room_entry = tk.Entry(root)
         self.room_entry.pack()
 
         self.username_label = tk.Label(root, text="Username:")
-        self.username_label.pack(pady=10)  
+        self.username_label.pack(pady=10)
         self.username_entry = tk.Entry(root)
         self.username_entry.pack()
 
@@ -75,7 +75,7 @@ class Login():
         if not 6 <= len(room) <= 36 and room != '':
             room = str(uuid.uuid4())
         threading.Thread(target=self._create_room_thread, args=(username, room), daemon=True).start()
-    
+
     def _create_room_thread(self, username, room_id):
         global room, key
         self.switch_status('disabled')
@@ -99,7 +99,7 @@ class Login():
             messagebox.showerror('Error', 'Failed to create room.')
             self.switch_status('normal')
             return
-        room = room_id 
+        room = room_id
         try:
             self.sio.connect(base_url)
         except:
@@ -122,7 +122,7 @@ class Login():
         if not 3 <= len(username) <= 20:
             username = generate_username(1)[0]
         threading.Thread(target=self._join_room_thread, args=(username, room), daemon=True).start()
-    
+
     def _join_room_thread(self, username, room):
         global key
         self.switch_status('disabled')
@@ -145,7 +145,7 @@ class Login():
             print(response)
             top = tk.Toplevel(self.root)
             top.withdraw()
-            Chat(top, self.root)            
+            Chat(top, self.root)
         elif response.status_code == 404:
             messagebox.showerror('Error', 'Room does not exist.')
             self.switch_status('normal')
@@ -173,7 +173,7 @@ class Login():
             self.root.title("Loading...")
         else:
             self.root.title("Login")
-    
+
 
 
 
@@ -375,7 +375,6 @@ class Chat():
         self.root.clipboard_append(username)
 
 
-
     def send_message(self):
         def __encrypt_message(message):
             iv = get_random_bytes(16)
@@ -398,7 +397,8 @@ class Chat():
         zip_extensions = self.config.get('zip_extensions')
         audio_extensions = self.config.get('audio_extensions')
         video_extensions = self.config.get('video_extensions')
-        extensions = text_extensions + img_extensions + zip_extensions + audio_extensions + video_extensions
+        diverse_extensions = self.config.get('diverse_extensions')
+        extensions = text_extensions + img_extensions + zip_extensions + audio_extensions + video_extensions + diverse_extensions
 
         all_extensions = [(f'All files ({", ".join("*." + ext for ext in extensions)})', ' '.join(f'*.{ext}' for ext in extensions))]
         text_files = [(f'Text files ({", ".join("*." + ext for ext in text_extensions)})', ' '.join(f'*.{ext}' for ext in text_extensions))]
@@ -421,7 +421,7 @@ class Chat():
             self.uuid = str(uuid.uuid4())
             data = {'room': room, 'user': username, 'only_filename': only_filename, 'filesize': filesize, 'uuid': self.uuid}
             files = {'file': file_data}
-            def send_file_thread():  
+            def send_file_thread():
                 try:
                     response = requests.post(f'{base_url}/upload_file', files=files, data=data)
                     if response.status_code == 200:
@@ -468,7 +468,7 @@ class Chat():
                 self.chat_window.insert(tk.END, f'{datetime.now().strftime("%H:%M:%S")} (You):\n', 'username_self')
             else:
                 self.chat_window.insert(tk.END, f'{datetime.now().strftime("%H:%M:%S")} ({username}):\n', 'usename_partner')
-        
+
             start = 0
             for match in url_pattern.finditer(message):
                 self.chat_window.insert(tk.END, message[start:match.start()], 'message')
@@ -499,24 +499,19 @@ class Chat():
 
 
     def open_link(self, event):
-        # Get the index of the mouse click
         click_index = self.chat_window.index("@%s,%s" % (event.x, event.y))
-        
-        # Get all the tags at the click index
+
         tags = self.chat_window.tag_names(click_index)
-        
-        # Check if the clicked text has the "link" tag
+
         if "link" in tags:
-            # Get the range of the link tag
             ranges = self.chat_window.tag_ranges("link")
             for i in range(0, len(ranges), 2):
                 start = ranges[i]
                 end = ranges[i+1]
-                # Check if the click index is within this range
                 if self.chat_window.compare(start, "<=", click_index) and self.chat_window.compare(end, ">=", click_index):
                     url = self.chat_window.get(start, end).strip()
                     break
-        
+
         if not self.is_url_active(url):
             messagebox.showwarning("Warning", f"Link is no longer valid.\nLinks are only available for {self.config.get('file_age_limit')}.")
             return
@@ -533,7 +528,6 @@ class Chat():
 
 
     def is_url_active(self, url):
-        # If url starts with base_url, then return
         if not url.startswith(base_url):
             return True
         else:
@@ -610,7 +604,7 @@ class Chat():
 
 
 
-      
+
 
 
 
@@ -644,12 +638,12 @@ if __name__ == '__main__':
                 sys.exit(1)
         url = config['url']
         port = config['port']
-        
+
     static = os.path.join(os.path.dirname(__file__), 'static')
     icon = os.path.join(static, 'icon.ico')
     loading_img = os.path.join(static, 'loading.png')
     login_img = os.path.join(static, 'login.png')
-    
+
     client = socketio.Client()
     try:
         base_url = url
@@ -659,7 +653,7 @@ if __name__ == '__main__':
             raise requests.exceptions.ConnectionError
     except requests.exceptions.ConnectionError:
         try:
-            base_url = f'{url}:{port}'  
+            base_url = f'{url}:{port}'
             print(base_url)
             request = requests.get(f'{base_url}/health')
             if request.status_code != 200:

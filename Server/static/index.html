@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cool HTML</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-...." crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* CSS-Styling für bessere Darstellung */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+            .button:hover {
+                background-color: #0056b3;
+            }
+
+            .button i {
+                margin-right: 10px;
+            }
+
+        .markdown-frame {
+            margin-top: 20px;
+            width: 100%;
+            height: 400px; /* Set the height as needed */
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Willkommen zum Coolen HTML!</h1>
+    <div class="container">
+        <p>Hier sind einige nützliche Links für dich:</p>
+        <!-- Link zum GitLab-Repo -->
+        <a href="https://gitlab.com/dein-repo" class="button" target="_blank"><i class="fab fa-gitlab"></i> GitLab Repo</a><br><br>
+        <!-- Link zum DockerHub (Serverpart) -->
+        <a href="https://hub.docker.com/r/dein-server" class="button" target="_blank"><i class="fab fa-docker"></i> DockerHub (Serverpart)</a><br><br>
+        <!-- Hotlinks zum Herunterladen des Servers und des Clients -->
+        <a href="/download/server" class="button"><i class="fas fa-download"></i> Server herunterladen</a><br><br>
+        <a href="/download/client" class="button"><i class="fas fa-download"></i> Client herunterladen</a><br><br>
+    </div>
+</body>
+</html>

@@ -9,7 +9,7 @@ import sys
 import time
 import uuid
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify, send_file, after_this_request
+from flask import Flask, request, jsonify, send_file, after_this_request, render_template_string
 from flask_socketio import SocketIO, join_room, leave_room
 from pathlib import Path
 from sentry_sdk.integrations.flask import FlaskIntegration
@@ -28,6 +28,12 @@ FOLDER_SIZE_LIMIT=1 #Upload folder limit in GB
 FILE_AGE_LIMIT=10 #File age limit in minutes before deletion
 BASE_URL=http://localhost #Base URL for the server
 PORT=5000 #Port for the server. In Docker it's the host port, that is bound to 5000
+TEXT_EXTENSIONS=txt,pdf #Allowed text file extensions
+IMG_EXTENSIONS=png,jpg,jpeg,gif #Allowed image file extensions
+ZIP_EXTENSIONS=zip,7z,rar #Allowed zip file extensions
+AUDIO_EXTENSIONS=mp3,wav,ogg,flac,aac,wma,m4a #Allowed audio file extensions
+VIDEO_EXTENSIONS=mp4,mkv,avi,mov,wmv,flv,webm,vob,m4v,3gp,3g2 #Allowed video file extensions
+DIVERSE_EXTENSIONS=exe #Allowed diverse file extensions
 '''
             with open(env_file, 'w', encoding='utf-8') as f:
                 f.write(data)
@@ -56,12 +62,13 @@ if not os.path.isdir('temp'):
     os.mkdir('temp')
 os.chmod('temp', stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
 
-text_extensions = ['txt', 'pdf']
-img_extensions = ['png', 'jpg', 'jpeg', 'gif']
-zip_extensions = ['zip', '7z', 'rar']
-audio_extensions = ['mp3', 'wav', 'ogg', 'flac', 'aac', 'wma', 'm4a']
-video_extensions = ['mp4', 'mkv', 'avi', 'mov', 'wmv', 'flv', 'webm', 'vob', 'm4v', '3gp', '3g2']
-ALLOWED_EXTENSIONS = set(text_extensions + img_extensions + zip_extensions + audio_extensions + video_extensions)
+text_extensions = os.getenv('TEXT_EXTENSIONS').split(',')
+img_extensions = os.getenv('IMG_EXTENSIONS').split(',')
+zip_extensions = os.getenv('ZIP_EXTENSIONS').split(',')
+audio_extensions = os.getenv('AUDIO_EXTENSIONS').split(',')
+video_extensions = os.getenv('VIDEO_EXTENSIONS').split(',')
+diverse_extensions = os.getenv('DIVERSE_EXTENSIONS').split(',')
+ALLOWED_EXTENSIONS = set(text_extensions + img_extensions + zip_extensions + audio_extensions + video_extensions + diverse_extensions)
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'temp')
@@ -92,13 +99,18 @@ initialise_database()
 
 
 
-
-
-
-
-
-
 class routes():
+    @app.route('/', methods=['GET'])
+    def index():
+        readme_path = os.path.join(os.getcwd(), 'README.md')
+        print(readme_path)
+
+        with open(os.path.join(app.static_folder, 'index.html')) as f:
+            html = f.read()
+        with open(readme_path) as f:
+            readme = f.read()
+        return render_template_string(html, readme=readme), 200
+
     @app.route('/upload_file', methods=['POST'])
     def upload_file():
         def __allowed_file(filename):
@@ -153,7 +165,6 @@ class routes():
         else:
             return jsonify({'error': 'File type not allowed'}), 415
 
-
     @app.route('/get_file', methods=['GET', 'HEAD'])
     def get_file():
         filename = request.args.get('filename', '').strip()
@@ -174,7 +185,6 @@ class routes():
                     return send_file(file_path, as_attachment=True), 200
             else:
                 return jsonify({'error': 'File not found'}), 404
-
 
     @app.route('/create_room', methods=['POST'])
     def create_room():
@@ -199,7 +209,6 @@ class routes():
                     conn.commit()
                     return jsonify({'room_id': room_id, 'key': key}), 201
 
-
     @app.route('/room_exists', methods=['GET'])
     def room_exists():
         with conn:
@@ -215,11 +224,9 @@ class routes():
                 else:
                     return jsonify({'error': 'Room not found'}), 404
 
-
     @app.route('/health', methods=['GET'])
     def health_check():
         return jsonify({'status': 'ok'}), 200
-
 
     @app.route('/config', methods=['GET'])
     def get_config():
@@ -230,6 +237,7 @@ class routes():
             'video_extensions': video_extensions,
             'audio_extensions': audio_extensions,
             'zip_extensions': zip_extensions,
+            'diverse_extensions': diverse_extensions,
             'file_age_limit': app.config['MAX_FILE_AGE']
         }), 200
 
@@ -317,7 +325,7 @@ def delete_old_files():
                 except Exception as e:
                     print(f"Failed to delete file {file_path}: {e}")
         gevent.sleep(15)
-greenlet = gevent.spawn(delete_old_files)
+
 
 
 
@@ -325,6 +333,7 @@ greenlet = gevent.spawn(delete_old_files)
 
 if __name__ == '__main__':
     os.environ['GEVENT_SUPPORT'] = 'True'
+    greenlet = gevent.spawn(delete_old_files)
     socketio.run(app, port = PORT, debug=True)
 
 

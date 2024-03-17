@@ -1,7 +1,7 @@
 stages:
    - build
 
-docker-build:
+docker:
   image: docker:latest
   stage: build
   services:
@@ -17,9 +17,25 @@ docker-build:
     - docker volume prune -f
   timeout: 120m
 
+
+nuitka64-server:
+  stage: build
+  tags:
+    - windows
+  script:
+    # Create venv
+    - python -m venv venv
+    - venv\Scripts\activate
+    - pip install nuitka
+    - pip install -r Server/requirements.txt
+    # Compile
+    - nuitka Server/Server.py --include-package=sentry_sdk -o Chat\ Server.exe --remove-output --standalone --onefile --company-name=Serpent Modding --product-name=Chat\ Server --file-version=0.2.0-beta --file-description=A\ simple\ server\ for\ Serpent\ Modding's\ Chat\ Client --icon=Server/static/icon.ico
+    -
+
+
 workflow:
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
-      when: always
+      when: never
     - if: $CI_PIPELINE_SOURCE == "trigger"
       when: always

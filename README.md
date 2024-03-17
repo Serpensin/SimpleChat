@@ -22,6 +22,12 @@ docker run -d -p 5000:5000 \
     -e FILE_AGE_LIMIT=10 #File age limit in minutes before deletion
     -e BASE_URL=http://localhost #Base URL for the server
     -e PORT=5000 #Port for the server. In Docker it's the port on the left side
+    -e TEXT_EXTENSIONS=txt,pdf #Allowed text file extensions
+    -e IMG_EXTENSIONS=png,jpg,jpeg,gif #Allowed image file extensions
+    -e ZIP_EXTENSIONS=zip,7z,rar #Allowed zip file extensions
+    -e AUDIO_EXTENSIONS=mp3,wav,ogg,flac,aac,wma,m4a #Allowed audio file extensions
+    -e VIDEO_EXTENSIONS=mp4,mkv,avi,mov,wmv,flv,webm,vob,m4v,3gp,3g2 #Allowed video file extensions
+    -e DIVERSE_EXTENSIONS=exe #Allowed diverse file extensions
     serpensin/chatserver
 ```
 

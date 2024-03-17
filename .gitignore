@@ -163,3 +163,4 @@ cython_debug/
 /Server/chat.db
 /Client/config.json
 /Server/temp
+/chat.db
