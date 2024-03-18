@@ -58,8 +58,7 @@ sentry_sdk.init(
     environment='Server'
 )
 
-if not os.path.isdir('temp'):
-    os.mkdir('temp')
+os.makedirs('temp', exist_ok=True)
 os.chmod('temp', stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
 
 text_extensions = os.getenv('TEXT_EXTENSIONS').split(',')
@@ -242,7 +241,6 @@ class routes():
         }), 200
 
 
-
 class sockets():
     @socketio.on('join')
     def on_join(data):
@@ -312,7 +310,6 @@ class sockets():
         print(f'File received: {filename}')
 
 
-
 def delete_old_files():
     while True:
         now = time.time()
@@ -329,12 +326,7 @@ def delete_old_files():
 
 
 
-
-
 if __name__ == '__main__':
     os.environ['GEVENT_SUPPORT'] = 'True'
     greenlet = gevent.spawn(delete_old_files)
     socketio.run(app, port = PORT, debug=True)
-
-
-

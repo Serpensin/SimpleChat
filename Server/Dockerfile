@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY *.py .
 COPY requirements.txt .
-COPY index.html .
+COPY static .
 
 ENV TERM xterm
 ENV PYTHONUNBUFFERED 1

@@ -3,6 +3,7 @@ import json
 import os
 import re
 import requests
+import sentry_sdk
 import socketio
 import sys
 import threading
@@ -20,7 +21,12 @@ from webbrowser import open as open_url
 
 
 
-
+sentry_sdk.init(
+    dsn='https://488edd07b7cc47239dd17c1f1b9b7a24@o4504883552780288.ingest.sentry.io/4505439575015424',
+    profiles_sample_rate=1.0,
+    traces_sample_rate=1.0,
+    environment='Client'
+)
 
 
 
@@ -111,7 +117,6 @@ class Login():
         top.withdraw()
         Chat(top, self.root)
 
-
     def join_room(self):
         global username, room
         username = self.username_entry.get().strip().replace(' ', '')
@@ -130,6 +135,11 @@ class Login():
             response = requests.get(f'{base_url}/room_exists?room_id={room}')
             key = base64.b64decode(response.json()['key'])
             print(key)
+        except KeyError:
+            if response.status_code == 404:
+                messagebox.showerror('Error', 'Room does not exist.')
+                self.switch_status('normal')
+                return
         except requests.exceptions.ConnectionError:
             messagebox.showerror('Error', 'Failed to connect to server.')
             self.switch_status('normal')
@@ -163,7 +173,6 @@ class Login():
             self.switch_status('normal')
             return
 
-
     def switch_status(self, state: str):
         self.create_button.config(state=state)
         self.join_button.config(state=state)
@@ -175,17 +184,9 @@ class Login():
             self.root.title("Login")
 
 
-
-
     def close(self):
         self.root.destroy()
         sys.exit(0)
-
-
-
-
-
-
 
 
 class Chat():
@@ -234,6 +235,7 @@ class Chat():
                 "text_extensions": list,
                 "video_extensions": list,
                 "zip_extensions": list,
+                "diverse_extensions": list,
             }
 
             for key, expected_type in expected_structure.items():
@@ -292,7 +294,6 @@ class Chat():
         self.sio.on('file')(self.file_uploaded)
         self.disconnected = False
         self.uuid = ''
-
 
 
         room_frame = tk.Frame(root)
@@ -367,13 +368,11 @@ class Chat():
         self.root.clipboard_clear()
         self.root.clipboard_append(room)
 
-
     def copy_username_to_clipboard(self):
         label_text = self.username_label.cget('text')
         username = label_text.split(": ")[1]
         self.root.clipboard_clear()
         self.root.clipboard_append(username)
-
 
     def send_message(self):
         def __encrypt_message(message):
@@ -390,7 +389,6 @@ class Chat():
         self.sio.emit('message', {'message': ciphertext, 'iv': iv, 'room': room, 'user': username})
         self.insert_into_chat(message, username = "X", kind = 'message')
 
-
     def send_file(self):
         text_extensions = self.config.get('text_extensions')
         img_extensions = self.config.get('img_extensions')
@@ -406,8 +404,9 @@ class Chat():
         archive_files = [(f'Archive files ({", ".join("*." + ext for ext in zip_extensions)})', ' '.join(f'*.{ext}' for ext in zip_extensions))]
         audio_files = [(f'Audio files ({", ".join("*." + ext for ext in audio_extensions)})', ' '.join(f'*.{ext}' for ext in audio_extensions))]
         video_files = [(f'Video files ({", ".join("*." + ext for ext in video_extensions)})', ' '.join(f'*.{ext}' for ext in video_extensions))]
+        diverse_files = [(f'Diverse files ({", ".join("*." + ext for ext in diverse_extensions)})', ' '.join(f'*.{ext}' for ext in diverse_extensions))]
 
-        filetypes = all_extensions + text_files + image_files + archive_files + audio_files + video_files
+        filetypes = all_extensions + text_files + image_files + archive_files + audio_files + video_files + diverse_files
         filename = filedialog.askopenfilename(filetypes=filetypes)
 
         if filename:
@@ -445,7 +444,6 @@ class Chat():
 
             self.send_file_button.configure(state='disabled', text='Sending...')
             threading.Thread(target=send_file_thread).start()
-
 
     def insert_into_chat(self, message, username: str = None, kind: str = None, url: str = ''):
         self.chat_window.configure(state='normal')
@@ -489,14 +487,12 @@ class Chat():
 
         self.chat_window.configure(state='disabled')
 
-
     def return_key(self, event):
         if event.state & 0x1:
             self.text_entry.insert(tk.END, '\n')
         else:
             self.send_message()
         return "break"
-
 
     def open_link(self, event):
         click_index = self.chat_window.index("@%s,%s" % (event.x, event.y))
@@ -525,8 +521,6 @@ class Chat():
         elif answer is None:
             pass
 
-
-
     def is_url_active(self, url):
         if not url.startswith(base_url):
             return True
@@ -537,11 +531,9 @@ class Chat():
             except requests.exceptions.ConnectionError:
                 return False
 
-
     def join(self, data):
         message = data['message']
         self.insert_into_chat(message, kind='join')
-
 
     def message(self, data):
         def __decrypt_message(message, key, iv):
@@ -556,7 +548,6 @@ class Chat():
         print(message)
         self.insert_into_chat(message, user, kind = 'message')
 
-
     def file_uploaded(self, data):
         url = data['url']
         user = data['user']
@@ -565,11 +556,9 @@ class Chat():
             return
         self.insert_into_chat(f"Received file: \"{filename}\"", user, kind = 'file', url = url)
 
-
     def leave(self, data):
         message = data['message']
         self.insert_into_chat(message, kind='leave')
-
 
     def disconnect(self, data = None):
         if self.disconnected:
@@ -585,7 +574,6 @@ class Chat():
             self.sio.disconnect()
         self.insert_into_chat(message, kind='disconnect')
 
-
     def close(self):
         self.root.withdraw()
         if self.sio.connected:
@@ -593,21 +581,6 @@ class Chat():
             self.sio.disconnect()
         self.root.destroy()
         os._exit(0)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
