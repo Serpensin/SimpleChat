@@ -1,21 +1,21 @@
 stages:
    - build
 
-docker:
-  image: docker:latest
-  stage: build
-  services:
-    - docker:dind
-  script:
-    - docker login -u serpensin -p $DOCKER_PW
-    - docker buildx create --use --name chatbuilder
-    - sleep 2
-    - docker buildx build --build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") --build-arg COMMIT=${CI_COMMIT_SHA} --compress --no-cache --platform linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x -t serpensin/chatserver:latest --push ./Server
-  after_script:
-    - docker buildx rm chatbuilder
-    - sleep 10
-    - docker volume prune -f
-  timeout: 120m
+# docker:
+#   image: docker:latest
+#   stage: build
+#   services:
+#     - docker:dind
+#   script:
+#     - docker login -u serpensin -p $DOCKER_PW
+#     - docker buildx create --use --name chatbuilder
+#     - sleep 2
+#     - docker buildx build --build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") --build-arg COMMIT=${CI_COMMIT_SHA} --compress --no-cache --platform linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x -t serpensin/chatserver:latest --push ./Server
+#   after_script:
+#     - docker buildx rm chatbuilder
+#     - sleep 10
+#     - docker volume prune -f
+#   timeout: 120m
 
 
 nuitka64-server:
@@ -43,7 +43,7 @@ nuitka32-server:
         - pip install nuitka
         - pip install -r Server/requirements.txt
         # Compile
-        - nuitka Server/Server.py --include-package=sentry_sdk --plugin-enable=tk-inter -o "Chat Server 32.exe" --remove-output --standalone --assume-yes-for-downloads --onefile --company-name="Serpent Modding" --product-name="Chat Server" --file-version=0.2.0 --file-description="A simple server for Serpent Modding's Chat Client" --windows-icon-from-ico=Server/static/icon.ico --target-arch=32
+        - nuitka Server/Server.py --include-package=sentry_sdk --plugin-enable=tk-inter -o "Chat Server 32.exe" --remove-output --standalone --assume-yes-for-downloads --onefile --company-name="Serpent Modding" --product-name="Chat Server" --file-version=0.2.0 --file-description="A simple server for Serpent Modding's Chat Client" --windows-icon-from-ico=Server/static/icon.ico
 
 
 nuitka64-client:
