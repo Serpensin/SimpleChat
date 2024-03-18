@@ -1,10 +1,9 @@
 stages:
-   - build-docker
-   - build-exe
+   - build
 
 docker:
   image: docker:latest
-  stage: build-docker
+  stage: build
   services:
     - docker:dind
   script:
@@ -20,7 +19,7 @@ docker:
 
 
 nuitka64-server:
-  stage: build-exe
+  stage: build
   tags:
     - windows
   script:
@@ -34,7 +33,7 @@ nuitka64-server:
 
 
 nuitka32-server:
-    stage: build-exe
+    stage: build
     tags:
         - windows32
     script:
@@ -48,7 +47,7 @@ nuitka32-server:
 
 
 nuitka64-client:
-    stage: build-exe
+    stage: build
     tags:
         - windows
     script:
@@ -62,7 +61,7 @@ nuitka64-client:
 
 
 nuitka32-client:
-    stage: build-exe
+    stage: build
     tags:
         - windows32
     script:
