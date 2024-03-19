@@ -22,7 +22,7 @@ stages:
 nuitka64-server:
     stage: build
     tags:
-      - windows
+      - windows64
     script:
       # Create venv
       - python -m venv venv
@@ -56,7 +56,7 @@ nuitka32-server:
 nuitka64-client:
     stage: build
     tags:
-        - windows
+        - windows64
     script:
         # Create venv
         - python -m venv venv
@@ -92,7 +92,6 @@ gitlab-release:
     stage: publish
     tags:
         - windows
-        - windows32
     needs:
         - job: nuitka64-server
           artifacts: true
