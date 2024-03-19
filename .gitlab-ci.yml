@@ -102,11 +102,7 @@ compress:
     script:
         - apt update && apt install -y p7zip-full curl
         - 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on archive.7z *.exe
-        - 'curl -X POST \
-            -H "Content-Type: multipart/form-data" \
-            -F "file=@archive.7z" \
-            -F "payload_json={\"content\":\"New build available!\"}" \
-            $DISCORD_WEBHOOK'
+        - 'curl -X POST -H "Content-Type: multipart/form-data" -F "file=@archive.7z" -F "payload_json={\"content\":\"New build available!\"}" $DISCORD_WEBHOOK'
 
 
 
