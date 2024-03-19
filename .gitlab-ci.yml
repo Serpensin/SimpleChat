@@ -90,7 +90,7 @@ nuitka32-client:
 
 github-release:
     stage: publish
-    image: python:alpine3.19
+    image: bitnami/git
     needs:
         # - job: nuitka64-server
         #   artifacts: true
