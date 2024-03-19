@@ -101,7 +101,8 @@ github-release:
         - job: nuitka32-client
           artifacts: true
     script:
-    - apt install -y git curl
+    - git config --global user.email $GITLAB_USER_EMAIL
+    - git config --global user.name $GITLAB_USER_NAME
     - |
       mkdir artifacts
       cp *.exe artifacts/
