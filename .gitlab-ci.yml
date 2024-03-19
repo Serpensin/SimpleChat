@@ -101,6 +101,7 @@ github-release:
         - job: nuitka32-client
           artifacts: true
     script:
+    - apt install -y git curl
     - |
       mkdir artifacts
       cp *.exe artifacts/
