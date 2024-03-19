@@ -102,6 +102,7 @@ compress:
     script:
         - apt update && apt install -y p7zip-full
         - 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on archive.7z *.exe
+        - python -m pip install requests
         - python send_to_discord.py $DISCORD_WEBHOOK
 
 
