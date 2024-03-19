@@ -88,51 +88,23 @@ nuitka32-client:
 
 
 
-github-release:
-    stage: publish
-    image: bitnami/git
+compress:
+    stage: build
+    image: python:3.11
     needs:
-        # - job: nuitka64-server
-        #   artifacts: true
+        - job: nuitka64-server
+          artifacts: true
         - job: nuitka32-server
           artifacts: true
-        # - job: nuitka64-client
-        #   artifacts: true
+        - job: nuitka64-client
+          artifacts: true
         - job: nuitka32-client
           artifacts: true
     script:
-    - git config --global user.email $GITLAB_USER_EMAIL
-    - git config --global user.name $GITLAB_USER_NAME
-    - |
-      mkdir artifacts
-      cp *.exe artifacts/
+        - apt update && apt install -y p7zip-full curl
+        - 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on archive.7z *.exe
+        - 'curl -X POST -H "Content-Type: application/json" -d "{\"content\":\"New build available!\"}" $DISCORD_WEBHOOK'
 
-      RELEASE_NAME="v0.2.0-testname"
-      RELEASE_TAG="v0.2.0-testrelease"
-
-      git tag -a $RELEASE_TAG -m "Release $RELEASE_NAME"
-
-      git push origin $RELEASE_TAG
-
-      curl -X POST \
-        -H "Authorization: token $GITHUB_TOKEN" \
-        -H "Content-Type: application/json" \
-        -d '{
-          "tag_name": "'$RELEASE_TAG'",
-          "name": "'$RELEASE_NAME'",
-          "body": "This is an description example.",
-          "draft": false,
-          "prerelease": false
-        }' \
-        https://api.github.com/repos/Serpensin/SimpleChat/releases
-
-      for file in $(ls artifacts); do
-        curl -X POST \
-          -H "Authorization: token $GITHUB_TOKEN" \
-          -H "Content-Type: application/octet-stream" \
-          --data-binary "@artifacts/$file" \
-          https://uploads.github.com/repos/Serpensin/SimpleChat/releases/$RELEASE_TAG/assets?name=$file
-      done
 
 
 
