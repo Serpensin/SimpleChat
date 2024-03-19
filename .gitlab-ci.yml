@@ -19,21 +19,21 @@ stages:
 #   timeout: 120m
 
 
-# nuitka64-server:
-#     stage: build
-#     tags:
-#       - windows64
-#     script:
-#       # Create venv
-#       - python -m venv venv
-#       - venv\Scripts\activate
-#       - pip install nuitka
-#       - pip install -r Server/requirements.txt
-#       # Compile
-#       - nuitka Server/Server.py --include-package=sentry_sdk --plugin-enable=tk-inter -o "Chat Server.exe" --remove-output --standalone --assume-yes-for-downloads --onefile --company-name="Serpent Modding" --product-name="Chat Server" --file-version=0.2.0 --file-description="A simple server for Serpent Modding's Chat Client" --windows-icon-from-ico=Server/static/icon.ico
-#     artifacts:
-#         paths:
-#           - Chat Server.exe
+nuitka64-server:
+    stage: build
+    tags:
+      - windows64
+    script:
+      # Create venv
+      - python -m venv venv
+      - venv\Scripts\activate
+      - pip install nuitka
+      - pip install -r Server/requirements.txt
+      # Compile
+      - nuitka Server/Server.py --include-package=sentry_sdk --plugin-enable=tk-inter -o "Chat Server.exe" --remove-output --standalone --assume-yes-for-downloads --onefile --company-name="Serpent Modding" --product-name="Chat Server" --file-version=0.2.0 --file-description="A simple server for Serpent Modding's Chat Client" --windows-icon-from-ico=Server/static/icon.ico
+    artifacts:
+        paths:
+          - Chat Server.exe
 
 
 nuitka32-server:
@@ -53,21 +53,21 @@ nuitka32-server:
           - Chat Server_32.exe
 
 
-# nuitka64-client:
-#     stage: build
-#     tags:
-#         - windows64
-#     script:
-#         # Create venv
-#         - python -m venv venv
-#         - venv\Scripts\activate
-#         - pip install nuitka
-#         - pip install -r Client/requirements.txt
-#         # Compile
-#         - nuitka Client/Client.py --include-package=sentry_sdk --plugin-enable=tk-inter -o "Chat Client.exe" --remove-output --standalone --assume-yes-for-downloads --onefile --company-name="Serpent Modding" --product-name="Chat Client" --file-version=0.2.0 --file-description="A simple client for Serpent Modding's Chat Server" --windows-icon-from-ico=Client/static/icon.ico
-#     artifacts:
-#       paths:
-#         - Chat Client.exe
+nuitka64-client:
+    stage: build
+    tags:
+        - windows64
+    script:
+        # Create venv
+        - python -m venv venv
+        - venv\Scripts\activate
+        - pip install nuitka
+        - pip install -r Client/requirements.txt
+        # Compile
+        - nuitka Client/Client.py --include-package=sentry_sdk --plugin-enable=tk-inter -o "Chat Client.exe" --remove-output --standalone --assume-yes-for-downloads --onefile --company-name="Serpent Modding" --product-name="Chat Client" --file-version=0.2.0 --file-description="A simple client for Serpent Modding's Chat Server" --windows-icon-from-ico=Client/static/icon.ico
+    artifacts:
+      paths:
+        - Chat Client.exe
 
 
 nuitka32-client:
@@ -85,7 +85,6 @@ nuitka32-client:
     artifacts:
         paths:
           - Chat Client_32.exe
-
 
 
 compress:
