@@ -1,11 +1,14 @@
+import os
 import requests
 import sys
 
 def main():
     webhook_url = sys.argv[1]
-    message = {'content': 'New build available!'}
-    files = {'file': open('archive.7z', 'rb')}
-    requests.post(webhook_url, data=message, files=files)
+    for file in os.listdir():
+        if file.startswith("archive"):
+            files = {'file': open(file, 'rb')}
+            response = requests.post(webhook_url, files=files)
+            print(response.text)
 
 if __name__ == "__main__":
     main()
