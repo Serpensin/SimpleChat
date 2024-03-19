@@ -90,6 +90,7 @@ nuitka32-client:
 
 github-release:
     stage: publish
+    image: curl:latest
     needs:
         # - job: nuitka64-server
         #   artifacts: true
