@@ -91,6 +91,8 @@ nuitka32-client:
 github-release:
     stage: publish
     image: curlimages/curl
+    services:
+      - docker:dind
     needs:
         # - job: nuitka64-server
         #   artifacts: true
