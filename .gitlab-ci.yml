@@ -90,7 +90,7 @@ nuitka32-client:
 
 github-release:
     stage: publish
-    image: curlimages/curl
+    image: python:alpine3.19
     needs:
         # - job: nuitka64-server
         #   artifacts: true
