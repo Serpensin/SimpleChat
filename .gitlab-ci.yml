@@ -101,7 +101,7 @@ compress:
           artifacts: true
     script:
         - apt update && apt install -y p7zip-full
-        - 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on -v25m archive.7z *.exe
+        - 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on -v24m archive.7z *.exe
         - pip install requests
         - python send_to_discord.py $DISCORD_WEBHOOK
 
