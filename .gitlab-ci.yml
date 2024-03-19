@@ -91,12 +91,12 @@ nuitka32-client:
 github-release:
     stage: publish
     needs:
-        - job: nuitka64-server
-          artifacts: true
+        # - job: nuitka64-server
+        #   artifacts: true
         - job: nuitka32-server
           artifacts: true
-        - job: nuitka64-client
-          artifacts: true
+        # - job: nuitka64-client
+        #   artifacts: true
         - job: nuitka32-client
           artifacts: true
     script:
